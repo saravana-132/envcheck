@@ -1,0 +1,14 @@
+target/
+out/
+*.class
+*.jar
+!scripts/*.jar
+
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+.DS_Store
