@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#
+# Sample git pre-commit hook for envcheck.
+#
+# Install:
+#   cp scripts/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# This blocks a commit if envcheck detects a likely secret in the repo.
+# Requires envcheck.jar to be built (mvn package) and available on PATH
+# or referenced via ENVCHECK_JAR below.
+
+set -euo pipefail
+
+ENVCHECK_JAR="${ENVCHECK_JAR:-target/envcheck.jar}"
+
+if [ ! -f "$ENVCHECK_JAR" ]; then
+  echo "pre-commit: envcheck.jar not found at $ENVCHECK_JAR - skipping secret scan."
+  echo "pre-commit: run 'mvn package' to build it, or set ENVCHECK_JAR."
+  exit 0
+fi
+
+java -jar "$ENVCHECK_JAR" .
+STATUS=$?
+
+if [ "$STATUS" -ne 0 ]; then
+  echo ""
+  echo "pre-commit: commit blocked - envcheck found potential secrets (see above)."
+  echo "pre-commit: fix them, or mark a false positive with 'envcheck:ignore'."
+  exit 1
+fi
+
+exit 0
